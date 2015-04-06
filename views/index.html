@@ -17,6 +17,7 @@
           <tr>
             <th>Name</th>
             <th>Status</th>
+            <th>Response time (ms)</th>
             <th>Worker</th>
             <th>Last deploy date</th>
           </tr>
@@ -26,6 +27,7 @@
             <tr id="{{ loop.index0 }}">
               <td class="name">{{ site.name }}</td>
               <td class="status">{{ site.status }}</td>
+              <td class="responseTime">{{ site.responseTime }}</td>
               <td class="worker">{{ site.worker }}</td>
               <td class="last_deploy_date">{{ site.last_deploy_date }}</td>
             </tr>
@@ -33,6 +35,19 @@
         </tbody>
       </table>
     </div>
+    {% for site in sites %}
+      <div class="row" id="charts">
+        <div class="three columns">
+          <strong>{{ site.name }}</strong>
+          <p><i>mean web response time</i></p>
+          <p><strong id="average_{{ loop.index0 }}" class="average"></strong></p>
+
+        </div>
+        <div class="nine columns">
+          <canvas id="chart_{{ loop.index0 }}" width="960" height="120"></canvas>
+        </div>
+      </div>
+    {% endfor %}
 </div>
 
   <script src="/socket.io/socket.io.js"></script>
@@ -50,7 +65,7 @@
 
     socket.on('connect_error', function(error){
       var messages_row = document.getElementById('messages');
-      messages_row.innerHTML = error.type + ': ' + error.message;
+      messages_row.innerHTML = '<p class="message error">' + error.type + ': ' + error.message + '</p>';
     });
 
     socket.on('connect_timeout', function(){
@@ -79,16 +94,70 @@
       worker.innerHTML = 'sending request..';
     });
 
+    var sites_data = [
+      {% for site in sites %}
+      {
+        labels: [],
+        datasets: [
+            {
+                label: "My First dataset",
+                fillColor: "rgba(220,220,220,0.2)",
+                strokeColor: "rgba(220,220,220,1)",
+                pointColor: "rgba(220,220,220,1)",
+                pointStrokeColor: "#fff",
+                pointHighlightFill: "#fff",
+                pointHighlightStroke: "rgba(220,220,220,1)",
+                data: []
+            }
+        ]
+      },
+      {% endfor %}
+    ]
+
     socket.on('got response', function(site){
       var site_row = document.getElementById(site.id);
+      var average_row = document.getElementById('average_' + site.id);
       var worker = site_row.querySelector('.worker');
+      var responseTime = site_row.querySelector('.responseTime');
       var status = site_row.querySelector('.status');
       var statusClass = site.statusCode == 200 ? 'success' : 'error';
 
       site_row.className = site_row.className + ' ' + statusClass;
       worker.dataset.updated = site.last_checked_date;
-      worker.innerHTML = 'Updated: <spac class="ago"></span> ago';
       status.innerHTML = site.statusCode + ': ' + site.statusMessage;
+      responseTime.innerHTML = site.responseTime;
+
+      var now = new Date();
+
+      sites_data[site.id].labels.push(now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds());
+      sites_data[site.id].datasets[0].data.push(site.responseTime);
+
+      if (sites_data[site.id].labels.length > 10) {
+        sites_data[site.id].labels.shift();
+      }
+
+      if (sites_data[site.id].datasets[0].data.length > 10) {
+        sites_data[site.id].datasets[0].data.shift();
+      }
+
+      var sum = 0.0;
+      var data_length = sites_data[site.id].datasets[0].data.length;
+      for (var i = 0; i < data_length; i++) {
+        sum += parseFloat(sites_data[site.id].datasets[0].data[i]);
+      }
+      var average = sum / data_length;
+
+      average_row.innerHTML = average.toFixed(2) + 'ms';
+
+      var ctx = document.getElementById("chart_" + site.id).getContext("2d");
+      var myLineChart = new Chart(ctx).Bar(sites_data[site.id], {
+        animation: false,
+        responsive: true,
+        showTooltips: false,
+        barShowStroke : false,
+        barStrokeWidth : 0,
+        barValueSpacing : 0,
+      });
     });
 
     socket.on('deploy start', function(site){
@@ -120,21 +189,16 @@
         var updated = status[i].dataset.updated;
         var ago = now - updated;
 
-        if (ago > 1000) {
-          ago = ago / 1000;
-          if (ago > 60)
-          {
-            ago = ago / 60;
-            suffix = 'min';
-          }
+        if (ago < 1000 * 60) {
+          status[i].innerHTML = 'updated less than minute ago';
+        } else {
+          status[i].innerHTML = ago.toFixed(2) + suffix + ' ago';
         }
 
-        var element_ago =  status[i].querySelector('.ago');
-        if (element_ago) {
-          status[i].querySelector('.ago').innerHTML = ago.toFixed(2) + suffix + ' ago';
-        }
+
 
       }
     }, 1000);
   </script>
+
 {% endblock %}

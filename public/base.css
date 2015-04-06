@@ -3,6 +3,10 @@ hr {
   margin-bottom: 1rem;
 }
 
+p {
+  margin-bottom: 0;
+}
+
 .row {
   margin: 5px 0;
 }
@@ -19,4 +23,12 @@ hr {
 
 .error {
   color: #e74c3c;
+}
+
+table, th, tr, td {
+  text-align: center;
+}
+
+.worker {
+  min-width: 200px;
 }

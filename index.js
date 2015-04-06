@@ -99,10 +99,13 @@ app.use(function(err, req, res, next) {
 function sendRequest(site){
   io.emit('sending request', site);
   console.log('sending request to: ' + site.host);
+  var startTime = new Date();
   var req = http.get(site.host, function(res) {
+    var endTime = new Date();
     site.statusCode = res.statusCode;
     site.statusMessage = res.statusMessage;
     site.last_checked_date = Date.now();
+    site.responseTime = endTime - startTime;
     io.emit('got response', site);
   });
 
