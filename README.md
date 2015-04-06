@@ -26,14 +26,12 @@ All configuration live in **config.js** file.
 **sites** - array of objects you want to check. Site object should look like (all fields are mandatory):
 
 ```
-
 {
   host: 'http://example.com',
   name: 'example.com',
   status: statuses.active.message, // default status
   last_deploy_date: "N/A" // default deploy date
 }
-
 ```
 
 ### Run
