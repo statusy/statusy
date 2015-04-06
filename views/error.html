@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block body %}
+  <div class="container" style="margin-top: 1%">
+    <div class="row">
+      <div class="u-full-width" id="messages">
+        <div class="message error">{{ message }}</div>
+      </div>
+      <pre>
+        {{ error.stack }}
+      </pre>
+
+    </div>
+  </div>
+
+{% endblock %}

@@ -1,147 +1,138 @@
-<!doctype html>
-<html>
-  <head>
-    <title>statusy</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="/normalize.css">
-    <link rel="stylesheet" href="/skeleton.css">
-    <link rel="stylesheet" href="/base.css">
-  </head>
-  <body>
-    <div class="container" style="margin-top: 1%">
-      <h5>statusy</h5>
-      <div class="row">
-        <div class="u-full-width" id="messages">
-        </div>
+{% extends "layout.html" %}
 
-        <div id="sub_messages"></div>
+{% block body %}
+  <div class="container" style="margin-top: 1%">
+    <h5>statusy</h5>
+    <div class="row">
+      <div class="u-full-width" id="messages">
       </div>
-      <div class="row">
-        <table class="u-full-width">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Worker</th>
-              <th>Last deploy date</th>
+
+      <div id="sub_messages"></div>
+    </div>
+    <div class="row">
+      <table class="u-full-width">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Worker</th>
+            <th>Last deploy date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for site in sites %}
+            <tr id="{{ loop.index0 }}">
+              <td class="name">{{ site.name }}</td>
+              <td class="status">{{ site.status }}</td>
+              <td class="worker">{{ site.worker }}</td>
+              <td class="last_deploy_date">{{ site.last_deploy_date }}</td>
             </tr>
-          </thead>
-          <tbody>
-            {% for site in sites %}
-              <tr id="{{ loop.index0 }}">
-                <td class="name">{{ site.name }}</td>
-                <td class="status">{{ site.status }}</td>
-                <td class="worker">{{ site.worker }}</td>
-                <td class="last_deploy_date">{{ site.last_deploy_date }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-  </div>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+</div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      var socket = io();
-      var deploys = document.getElementById("deploys");
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var deploys = document.getElementById("deploys");
 
-      socket.on('connect', function(error){
-        var messages_row = document.getElementById('messages');
-        var sub_messages_row = document.getElementById('sub_messages');
+    socket.on('connect', function(error){
+      var messages_row = document.getElementById('messages');
+      var sub_messages_row = document.getElementById('sub_messages');
 
-        messages_row.innerHTML = '<div class="message success">Connect succesfull</div>';
-        sub_messages_row.innerHTML = '';
-      });
+      messages_row.innerHTML = '<div class="message success">Connect succesfull</div>';
+      sub_messages_row.innerHTML = '';
+    });
 
-      socket.on('connect_error', function(error){
-        var messages_row = document.getElementById('messages');
-        messages_row.innerHTML = error.type + ': ' + error.message;
-      });
+    socket.on('connect_error', function(error){
+      var messages_row = document.getElementById('messages');
+      messages_row.innerHTML = error.type + ': ' + error.message;
+    });
 
-      socket.on('connect_timeout', function(){
-        console.log('connect timeout');
-      });
+    socket.on('connect_timeout', function(){
+      console.log('connect timeout');
+    });
 
-      socket.on('connect_timeout', function(){
-        console.log('connect timeout');
-      });
+    socket.on('connect_timeout', function(){
+      console.log('connect timeout');
+    });
 
-      socket.on('reconnect', function(number){
-        console.log(number);
-      });
+    socket.on('reconnect', function(number){
+      console.log(number);
+    });
 
-      socket.on('reconnecting', function(number){
-        var sub_messages_row = document.getElementById('sub_messages');
-        sub_messages_row.innerHTML = 'Trying to reconnect: ' + number;
-      });
+    socket.on('reconnecting', function(number){
+      var sub_messages_row = document.getElementById('sub_messages');
+      sub_messages_row.innerHTML = 'Trying to reconnect: ' + number;
+    });
 
-      socket.on('reconnect_attempt', function(){
-        console.log('reconnect_attempt');
-      });
+    socket.on('reconnect_attempt', function(){
+      console.log('reconnect_attempt');
+    });
 
-      socket.on('sending request', function(site){
-        var worker = document.getElementById(site.id).querySelector('.worker');
-        worker.innerHTML = 'sending request..';
-      });
+    socket.on('sending request', function(site){
+      var worker = document.getElementById(site.id).querySelector('.worker');
+      worker.innerHTML = 'sending request..';
+    });
 
-      socket.on('got response', function(site){
-        var site_row = document.getElementById(site.id);
-        var worker = site_row.querySelector('.worker');
-        var status = site_row.querySelector('.status');
-        var statusClass = site.statusCode == 200 ? 'success' : 'error';
+    socket.on('got response', function(site){
+      var site_row = document.getElementById(site.id);
+      var worker = site_row.querySelector('.worker');
+      var status = site_row.querySelector('.status');
+      var statusClass = site.statusCode == 200 ? 'success' : 'error';
 
-        site_row.className = site_row.className + ' ' + statusClass;
-        worker.dataset.updated = site.last_checked_date;
-        worker.innerHTML = 'Updated: <spac class="ago"></span> ago';
-        status.innerHTML = site.statusCode + ': ' + site.statusMessage;
-      });
+      site_row.className = site_row.className + ' ' + statusClass;
+      worker.dataset.updated = site.last_checked_date;
+      worker.innerHTML = 'Updated: <spac class="ago"></span> ago';
+      status.innerHTML = site.statusCode + ': ' + site.statusMessage;
+    });
 
-      socket.on('deploy start', function(site){
-        var site_row = document.getElementById(site.id);
-        var status = site_row.querySelector('.status');
-        var worker = site_row.querySelector('.worker');
+    socket.on('deploy start', function(site){
+      var site_row = document.getElementById(site.id);
+      var status = site_row.querySelector('.status');
+      var worker = site_row.querySelector('.worker');
 
-        status.innerHTML = site.status;
-        worker.innerHTML = site.worker;
-      });
+      status.innerHTML = site.status;
+      worker.innerHTML = site.worker;
+    });
 
-      socket.on('deploy stop', function(site){
-        var site_row = document.getElementById(site.id);
-        var status = site_row.querySelector('.status');
-        var date = site_row.querySelector('.last_deploy_date');
+    socket.on('deploy stop', function(site){
+      var site_row = document.getElementById(site.id);
+      var status = site_row.querySelector('.status');
+      var date = site_row.querySelector('.last_deploy_date');
 
-        status.innerHTML = site.status;
-        date.innerHTML = site.last_deploy_date;
-      });
+      status.innerHTML = site.status;
+      date.innerHTML = site.last_deploy_date;
+    });
 
-    </script>
+  </script>
 
-    <script>
-      setInterval(function () {
-        var now = Date.now();
-        var status = document.querySelectorAll('.worker');
-        var suffix = 'sec';
-        for (var i = 0; i < status.length; i++) {
-          var updated = status[i].dataset.updated;
-          var ago = now - updated;
+  <script>
+    setInterval(function () {
+      var now = Date.now();
+      var status = document.querySelectorAll('.worker');
+      var suffix = 'sec';
+      for (var i = 0; i < status.length; i++) {
+        var updated = status[i].dataset.updated;
+        var ago = now - updated;
 
-          if (ago > 1000) {
-            ago = ago / 1000;
-            if (ago > 60)
-            {
-              ago = ago / 60;
-              suffix = 'min';
-            }
+        if (ago > 1000) {
+          ago = ago / 1000;
+          if (ago > 60)
+          {
+            ago = ago / 60;
+            suffix = 'min';
           }
-
-          var element_ago =  status[i].querySelector('.ago');
-          if (element_ago) {
-            status[i].querySelector('.ago').innerHTML = ago.toFixed(2) + suffix + ' ago';
-          }
-
         }
-      }, 1000);
-    </script>
-  </body>
-</html>
+
+        var element_ago =  status[i].querySelector('.ago');
+        if (element_ago) {
+          status[i].querySelector('.ago').innerHTML = ago.toFixed(2) + suffix + ' ago';
+        }
+
+      }
+    }, 1000);
+  </script>
+{% endblock %}
