@@ -1,0 +1,24 @@
+.row {
+  margin: 5px 0;
+}
+
+.message {
+  padding: 8px 15px;
+  border-radius: 3px;
+  margin: 0 0 0px;
+  border: 1px solid #ccc;
+  position: relative;
+}
+
+.success {
+  color: #27ae60;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+.message.success {
+  background: #eaf4ef;
+  border-color: #99ccb2;
+}
