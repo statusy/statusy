@@ -1,7 +1,5 @@
 var config, statuses;
 
-
-
 statuses = {
   active : {
     message: "Active"
