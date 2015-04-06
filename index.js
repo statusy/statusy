@@ -97,16 +97,13 @@ app.use(function(err, req, res, next) {
 });
 
 function sendRequest(site){
-
-  var last_checked_date = Date.now();
-  site.last_checked_date = last_checked_date;
   io.emit('sending request', site);
   console.log('sending request to: ' + site.host);
   var req = http.get(site.host, function(res) {
-
+    site.statusCode = res.statusCode;
+    site.statusMessage = res.statusMessage;
+    site.last_checked_date = Date.now();
     io.emit('got response', site);
-    console.log(res.statusCode);
-    console.log(res.statusMessage);
   });
 
   req.on('error', function(e){
@@ -125,8 +122,6 @@ function asyncEachSite(){
   }, function(err){
     if(err) {
     console.log('A file failed to process');
-  } else {
-    console.log('All files have been processed successfully');
   }
   });
 }

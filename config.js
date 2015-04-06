@@ -18,7 +18,7 @@ statuses = {
 };
 
 config = {
-  DELAY_CHECK_SITES: 5 * 1000,
+  DELAY_CHECK_SITES: 60 * 1000,
   statuses: statuses,
   sites: [
     {

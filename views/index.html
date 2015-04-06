@@ -75,14 +75,18 @@
       });
 
       socket.on('sending request', function(site){
-        var status = document.getElementById(site.id).querySelector('.worker');
-        status.innerHTML = 'sending request..';
+        var worker = document.getElementById(site.id).querySelector('.worker');
+        worker.innerHTML = 'sending request..';
       });
 
       socket.on('got response', function(site){
-        var status = document.getElementById(site.id).querySelector('.worker');
-        status.dataset.updated = site.last_checked_date;
-        status.innerHTML = 'Updated: <spac class="ago"></span> ago';
+        var site_row = document.getElementById(site.id);
+        var worker = site_row.querySelector('.worker');
+        var status = site_row.querySelector('.status');
+
+        worker.dataset.updated = site.last_checked_date;
+        worker.innerHTML = 'Updated: <spac class="ago"></span> ago';
+        status.innerHTML = site.statusCode + ': ' + site.statusMessage;
       });
 
       socket.on('deploy start', function(site){
