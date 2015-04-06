@@ -4,7 +4,11 @@
 
 ## About
 
-Real time status page.
+Real time status page v0.1.0.
+
+![Screenshot](screen_v0.1.0.png)
+
+Powered by nodeJS, expressJS & SocketIO.
 
 ## Documentation
 
