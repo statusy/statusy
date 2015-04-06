@@ -1,9 +1,12 @@
 var express = require('express');
 var app = express();
-var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var http = require('http');
+var server = http.Server(app);
+var io = require('socket.io')(server);
 var path = require('path');
 var nunjucks = require('nunjucks');
+var async = require('async');
+
 var config = require('./config');
 var utils = require('./utils');
 
@@ -20,6 +23,7 @@ app.set('view engine', 'html');
 /* Routes */
 
 app.get('/', function(req, res){
+  console.log(config.sites);
   res.render('index', {sites: config.sites});
 });
 
@@ -33,6 +37,7 @@ app.get('/deploy/start/:site_id', function(req, res){
   var site = config.sites[site_id];
   site.id = site_id;
   site.status = config.statuses.deploy.message;
+  site.worker = config.statuses.worker.waiting;
   io.emit('deploy start', site);
   res.json({ message: 'success'});
 });
@@ -54,7 +59,7 @@ io.on('connection', function(socket){
   });
 });
 
-http.listen(3000, function(){
+server.listen(3000, function(){
   console.log('listening on *:3000');
 });
 
@@ -90,3 +95,41 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+function sendRequest(site){
+
+  var last_checked_date = Date.now();
+  site.last_checked_date = last_checked_date;
+  io.emit('sending request', site);
+  console.log('sending request to: ' + site.host);
+  var req = http.get(site.host, function(res) {
+
+    io.emit('got response', site);
+    console.log(res.statusCode);
+    console.log(res.statusMessage);
+  });
+
+  req.on('error', function(e){
+    console.log("Got error: " + e.message);
+  });
+
+}
+
+function asyncEachSite(){
+  async.each(config.sites, function(item, callback){
+    item.id = config.sites.indexOf(item);
+    if (item.status !== config.statuses.deploy.message) {
+      sendRequest(item);
+    }
+    callback(null);
+  }, function(err){
+    if(err) {
+    console.log('A file failed to process');
+  } else {
+    console.log('All files have been processed successfully');
+  }
+  });
+}
+
+asyncEachSite();
+setInterval(asyncEachSite, config.DELAY_CHECK_SITES);
