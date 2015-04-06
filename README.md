@@ -8,7 +8,7 @@ Real time status page v0.1.0.
 
 ![Screenshot](screen_v0.1.0.png)
 
-Powered by nodeJS, expressJS & SocketIO.
+Powered by nodeJS, expressJS, SocketIO & Vanilla JS.
 
 ## Documentation
 
@@ -25,7 +25,7 @@ All configuration live in **config.js** file.
 
 **sites** - array of objects you want to check. Site object should look like (all fields are mandatory):
 
-```
+```js
 {
   host: 'http://example.com',
   name: 'example.com',
