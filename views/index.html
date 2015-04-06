@@ -2,13 +2,15 @@
 
 {% block body %}
   <div class="container" style="margin-top: 1%">
-    <h5>statusy</h5>
+    <strong>statusy</strong>
+    <hr>
     <div class="row">
       <div class="u-full-width" id="messages">
       </div>
 
       <div id="sub_messages"></div>
     </div>
+
     <div class="row">
       <table class="u-full-width">
         <thead>
@@ -42,7 +44,7 @@
       var messages_row = document.getElementById('messages');
       var sub_messages_row = document.getElementById('sub_messages');
 
-      messages_row.innerHTML = '<div class="message success">Connect succesfull</div>';
+      messages_row.innerHTML = '<p class="message success">Connect succesfull</p>';
       sub_messages_row.innerHTML = '';
     });
 
