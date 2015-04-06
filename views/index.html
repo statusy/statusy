@@ -11,6 +11,8 @@
   <body>
     <div class="container" style="margin-top: 1%">
       <h5>statusy</h5>
+      <div id="messages"></div>
+      <div id="sub_messages"></div>
       <table class="u-full-width">
         <thead>
           <tr>
@@ -38,9 +40,43 @@
       var socket = io();
       var deploys = document.getElementById("deploys");
 
+      socket.on('connect', function(error){
+        var messages_row = document.getElementById('messages');
+        var sub_messages_row = document.getElementById('sub_messages');
+
+        messages_row.innerHTML = 'Connect succesfull';
+        sub_messages_row.innerHTML = '';
+      });
+
+      socket.on('connect_error', function(error){
+        var messages_row = document.getElementById('messages');
+        messages_row.innerHTML = error.type + ': ' + error.message;
+      });
+
+      socket.on('connect_timeout', function(){
+        console.log('connect timeout');
+      });
+
+      socket.on('connect_timeout', function(){
+        console.log('connect timeout');
+      });
+
+      socket.on('reconnect', function(number){
+        console.log(number);
+      });
+
+      socket.on('reconnecting', function(number){
+        var sub_messages_row = document.getElementById('sub_messages');
+        sub_messages_row.innerHTML = 'Trying to reconnect: ' + number;
+      });
+
+      socket.on('reconnect_attempt', function(){
+        console.log('reconnect_attempt');
+      });
+
       socket.on('sending request', function(site){
         var status = document.getElementById(site.id).querySelector('.worker');
-        status.innerHTML = 'sedning request..';
+        status.innerHTML = 'sending request..';
       });
 
       socket.on('got response', function(site){
