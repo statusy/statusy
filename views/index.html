@@ -1,15 +1,50 @@
-{% extends "layout.html" %}
+<!doctype html>
+<html>
+  <head>
+    <title>statusy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="/normalize.css">
+    <link rel="stylesheet" href="/skeleton.css">
+  </head>
+  <body>
+    <div class="container" style="margin-top: 1%">
+      <h5>statusy</h5>
+      <table class="u-full-width">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Last deploy date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for site in sites %}
+            <tr id="{{ loop.index0 }}">
+              <td class="name">{{ site.name }}</td>
+              <td class="status">{{ site.status }}</td>
+              <td class="last_deploy_date">{{ site.last_deploy_date }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  </div>
 
-{% block content %}
-<div class="measure p2">
-    <h1>statusy</h1>
-    <div class="grd">
-        <div class="grd-row brdr--light-gray p1">
-            <div class="col-6 fnt--green">
-                All systems operational.
-            </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      var deploys = document.getElementById("deploys");
 
-        </div>
-    </div>
-</div>
-{% endblock %}
+      socket.on('deploy start', function(site){
+        var status = document.getElementById(site.id).querySelector('.status');
+        status.innerHTML = site.status;
+      });
+
+      socket.on('deploy stop', function(data){
+        var deploy_li = document.getElementById(data.site_id);
+        deploy_li.innerHTML = '#' + data.site_id + ' Site - Everything operating normally.';
+      });
+
+    </script>
+  </body>
+</html>
