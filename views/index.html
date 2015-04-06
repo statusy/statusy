@@ -40,9 +40,13 @@
         status.innerHTML = site.status;
       });
 
-      socket.on('deploy stop', function(data){
-        var deploy_li = document.getElementById(data.site_id);
-        deploy_li.innerHTML = '#' + data.site_id + ' Site - Everything operating normally.';
+      socket.on('deploy stop', function(site){
+        var site_row = document.getElementById(site.id);
+        var status = site_row.querySelector('.status');
+        var date = site_row.querySelector('.last_deploy_date');
+
+        status.innerHTML = site.status;
+        date.innerHTML = site.last_deploy_date;
       });
 
     </script>

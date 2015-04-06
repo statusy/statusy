@@ -5,6 +5,7 @@ var io = require('socket.io')(http);
 var path = require('path');
 var nunjucks = require('nunjucks');
 var config = require('./config');
+var utils = require('./utils');
 
 /* Views configuration */
 
@@ -37,7 +38,12 @@ app.get('/deploy/start/:site_id', function(req, res){
 });
 
 app.get('/deploy/stop/:site_id', function(req, res){
-  io.emit('deploy stop', {site_id: req.params.site_id});
+  var site_id = req.params.site_id;
+  var site = config.sites[site_id];
+  site.id = site_id;
+  site.status = config.statuses.active.message;
+  site.last_deploy_date = utils.getFormattedDate();
+  io.emit('deploy stop', site);
   res.json({ message: 'success'});
 });
 
